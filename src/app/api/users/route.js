@@ -1,39 +1,41 @@
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 import { NextResponse } from 'next/server';
 
+function getClient() {
+  return createClient({
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN
+  });
+}
+
+// 1. The GET job: Fetch the roster for the dashboard
 export async function GET() {
   try {
-    const db = new Database('instagram_tracker.db');
-    const users = db.prepare('SELECT id, username, profile_pic_url, role, status FROM users').all();
-    return NextResponse.json(users);
+    const client = getClient();
+    const rs = await client.execute('SELECT id, username, role, status, profile_pic_url FROM users');
+    
+    return NextResponse.json(rs.rows);
   } catch (error) {
-    return NextResponse.json({ error: "Could not fetch users" }, { status: 500 });
+    console.error("USERS GET CRASH:", error);
+    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }
 
+// 2. The PATCH job: Admin approving a user (changing status from pending to active)
 export async function PATCH(request) {
   try {
     const body = await request.json();
-    const db = new Database('instagram_tracker.db');
+    const { id, status } = body;
+    const client = getClient();
 
-    // [NEW] The command to update a user's profile picture
-    if (body.action === 'change_pic') {
-      db.prepare("UPDATE users SET profile_pic_url = ? WHERE username = ?").run(body.profilePic, body.username);
-      return NextResponse.json({ success: true });
-    }
-
-    // The God Mode commands
-    const { id, action } = body;
-    if (action === 'approve' || action === 'unban') {
-      db.prepare("UPDATE users SET status = 'active' WHERE id = ?").run(id);
-    } else if (action === 'kick') {
-      db.prepare("DELETE FROM users WHERE id = ?").run(id);
-    } else if (action === 'ban') {
-      db.prepare("UPDATE users SET status = 'banned' WHERE id = ?").run(id);
-    }
+    await client.execute({
+      sql: 'UPDATE users SET status = ? WHERE id = ?',
+      args: [status, id]
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: "Could not perform admin action" }, { status: 500 });
+    console.error("USERS PATCH CRASH:", error);
+    return NextResponse.json({ error: "Failed to update user status" }, { status: 500 });
   }
 }
