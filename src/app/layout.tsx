@@ -15,7 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "The Hunt",
   description: "Pipeline Tracker",
-  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
