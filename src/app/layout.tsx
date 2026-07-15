@@ -1,22 +1,18 @@
-// Keep your existing imports at the very top (like globals.css or fonts)
- import "./globals.css"; 
+import "./globals.css";
 
 export const metadata = {
   title: "The Hunt",
   description: "Pipeline Tracker",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        {/* The Nuclear Option: Forcing Chrome to see the manifest */}
-        <link rel="manifest" href="/manifest.json" />
-      </head>
       <body>
         {children}
         
-        {/* The Heartbeat: Forcing the browser to recognize a true PWA */}
+        {/* Service Worker for PWA Installation */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -24,10 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js').then(
                     function(registration) { 
-                      console.log('Service Worker registration successful:', registration.scope); 
+                      console.log('Service Worker registration successful'); 
                     },
                     function(err) { 
-                      console.log('Service Worker registration failed:', err); 
+                      console.log('Service Worker registration failed: ', err); 
                     }
                   );
                 });
