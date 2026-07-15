@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "The Hunt Is On",
-  description: "Target Locked.",
+  title: "The Hunt",
+  description: "Pipeline Tracker",
   manifest: "/manifest.json",
 };
 
