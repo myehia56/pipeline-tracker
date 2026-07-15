@@ -1,5 +1,5 @@
 // Keep your existing imports at the very top (like globals.css or fonts)
-// import "./globals.css"; 
+ import "./globals.css"; 
 
 export const metadata = {
   title: "The Hunt",
